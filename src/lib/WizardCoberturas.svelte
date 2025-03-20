@@ -1,9 +1,11 @@
 <script>
     import {get, writable} from 'svelte/store';
-    import {WriteForm} from '../lib/SvelteEpicForm/index.js';
+    import {WriteForm} from '../lib/SvelteEpicForm/index';
     import {page} from "$app/stores";
     import {calculadorCoberturas} from "../services/calculadorCoberturas.js";
     import PrimaResult from "./PrimaResult.svelte";
+    import {Form, Input} from "./SvelteEpicForm/index.js";
+    import PlatformPicker from "./PlatformPicker.svelte";
 
     export let forms = []; // Array of form objects received as props
     let sections = ["Conozcamonos", "Ingresos", "Historial", "Asegurate"];
@@ -11,7 +13,10 @@
     let currentStep = 0; // Track the current step in the wizard
     let currentSectionIndex = 0;
     let submitted = false; // Track if the wizard is complete
-    export let values = writable({}); // Bindable values for forms
+    let hasErrors;
+    export let values = writable({
+        nombreUsuario: '@',
+    }); // Bindable values for forms
     function nextStep() {
         if (currentStep < forms.length - 1) {
             currentStep++;
@@ -19,10 +24,10 @@
             submitAll();
         }
     }
-    let prima
+    let results
     function submitAll() {
         submitted = true;
-        prima = calculadorCoberturas($values, $page.url.searchParams.get('coberturas').split(','))
+        results = calculadorCoberturas($values, $page.url.searchParams.get('coberturas').split(','))
     }
 
     function submit(event) {
@@ -30,9 +35,7 @@
         nextStep();
     }
     const checkSectionChange = (form) => {
-        console.log(get(form))
         const formType = get(form).formType
-        console.log(formType)
         if (formType === 'Conozcamonos') {
             currentSectionIndex = 0
         } else if (formType === 'Ingresos') {
@@ -83,29 +86,44 @@
         </div>
     </div>
     {/if}
-    <div class="md:px-20 px-5 w-full md:w-auto shadow-2xl rounded-md mt-10 space-y-4 bg-white">
         {#if !submitted}
-            <div class="flex items-center w-full mt-4">
-                {#if currentStep > 0}
-                    <button on:click={() => currentStep--} class="mr-auto">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                        </svg>
-                    </button>
-                {/if}
-<!--                <p class="text-primary font-bold ml-auto">{currentStep + 1}/{forms.length}</p>-->
+    <div class="md:px-20 px-5 w-full md:w-auto shadow-2xl border-gray-200 border rounded-md mt-10 space-y-4 ">
+            <div class="flex items-center justify-between w-full mt-10">
+                <p class="text-black font-bold ">{get(forms[currentStep]).formType}</p>
+                <p class="text-primary font-bold ml-auto">{currentStep + 1}/{forms.length}</p>
             </div>
-            <WriteForm
-                    bind:values
-                    form={forms[currentStep]}
-                    on:submit={submit}
-                    containerClass="py-10 md:w-96 w-full"
-                    listClass="space-y-10"
-                    showSecondaryButton={false}
-                    primaryButtonText={currentStep < forms.length - 1 ? "Siguiente" : "Enviar solicitud"}
-                    primaryButtonClass="cursor-pointer border-2 hover:animate text-white py-2 border-primary primary-color hover:bg-white w-full mt-5 rounded-full" />
-        {:else}
-            <PrimaResult {prima}/>
-        {/if}
+
+            <Form form={forms[currentStep]} bind:values bind:hasErrors>
+                <div class="grid text-sm md:grid-cols-4 gap-x-4 gap-y-8 pb-lg">
+                    {#each get(forms[currentStep]).inputs as input (input.name)}
+                            <Input
+                                    name={`${input.name}`}
+                            />
+                    {/each}
+                    {#if get(forms[currentStep]).formType === 'Conozcamonos'}
+                        <div class="col-span-4">
+                            <PlatformPicker bind:values/>
+                        </div>
+                    {/if}
+                </div>
+            </Form>
+<!--            <WriteForm-->
+<!--                    bind:values-->
+<!--                    form={forms[currentStep]}-->
+<!--                    on:submit={submit}-->
+<!--                    containerClass="py-10 md:w- w-full"-->
+<!--                    listClass="space-y-10"-->
+<!--                    showButtons={false}-->
+<!--                />-->
+        <div class="pb-10  flex {currentStep > 0? 'justify-between space-x-4' : 'justify-end'} items-center">
+
+            {#if currentStep > 0}
+                <button on:click={() => currentStep--}  class="w-[100px] cursor-pointer border-2 hover:animate py-2 border-gray-300  hover:bg-gray-50 w-full mt-5 rounded-full">Atras</button>
+            {/if}
+            <button disabled={hasErrors} on:click={submit} class="cursor-pointer w-[100px] border-2 hover:animate py-2 border-primary  hover:border-lg trans hover:text-primary w-full mt-5 rounded-full">Siguiente</button>
+        </div>
     </div>
+        {:else}
+            <PrimaResult bind:values {results}/>
+        {/if}
 </div>

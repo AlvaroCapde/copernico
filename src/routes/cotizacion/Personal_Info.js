@@ -11,41 +11,23 @@ const informacionPersonal = writable( {
             label: 'Nombre completo del asegurado',
             placeholder: 'Juan Perez',
             required: true,
+            moreInfo: 'Persona física o moral que solicita el pago en caso de siniestro',
             layout: {
                 write: {
-                    containerClass: 'col-4'
+                    containerClass: 'md:col-span-2 col-span-4'
                 }
-            }
-        },
-        {
-            type: 'select',
-            name: 'plataforma',
-            label: 'Plataforma a asegurar',
-            required: true,
-            layout: {
-                write: {
-                    containerClass: 'col-4'
-                }
-            },
-            data: {
-                options: [
-                    { label: 'Instagram', value: 'Instagram' },
-                    { label: 'Facebook', value: 'Facebook' },
-                    { label: 'X', value: 'X' },
-                    { label: 'TikTok', value: 'TikTok' },
-                    { label: 'Youtube', value: 'Youtube' }
-                ]
             }
         },
         {
             type: 'text',
             name: 'nombreUsuario',
+            moreInfo: 'Debe coincidir exactamente con la cuenta asegurada.',
             label: 'Nombre usuario en la plataforma seleccionada',
             placeholder: '@ejemplo',
             required: true,
             layout: {
                 write: {
-                    containerClass: 'col-4'
+                    containerClass: 'md:col-span-2 col-span-4'
                 }
             }
         },

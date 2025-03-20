@@ -15,14 +15,27 @@ const ingresoDiarioDeclarado = writable( {
     formType: 'Ingresos',
     inputs: [
         {
-            type: 'text',
-            name: 'ingresoDiarioDeclarado',
-            label: 'Ingreso Diaro Declarado',
-            placeholder: '5000',
+            type: 'number',
+            name: 'ingresoMensualDeclarado',
+            label: 'Ingreso Mensual Declarado',
+            placeholder: '$10,000',
             required: true,
             layout: {
                 write: {
-                    containerClass: 'col-4'
+                    containerClass: 'col-span-4'
+                }
+            }
+        },
+        {
+            type: 'number',
+            name: 'numeroSeguidores',
+            label: 'Numero de seguidores en la cuenta',
+            placeholder: '10,000',
+            required: true,
+            moreInfo: 'Valor de la cuenta en MXN',
+            layout: {
+                write: {
+                    containerClass: 'col-span-4'
                 }
             }
         },
@@ -34,88 +47,130 @@ const factorDeAjuste = writable({
     inputs: [
         {
             type: 'select',
-            name: 'historial',
-            label: 'Historial de Seguridad y Hackeos',
+            name: 'historialSuspension',
+            label: 'Has sido suspendido en los ultimos 5 años?',
+            placeholder: 'Selecciona una opción',
             required: true,
             layout: {
                 write: {
-                    containerClass: 'col-4'
+                    containerClass: 'col-span-4'
                 }
             },
             data: {
                 options: [
-                    { label: 'Sin incidentes', value: 0.9 },
-                    { label: 'Con 1 incidente', value: 1 },
-                    { label: 'Con más de 1 incidente', value: 1.3 }
+                    { label: 'Nunca he perdido una cuenta', value: 0 },
+                    { label: 'He sido suspendido 1 vez en los ultimos 5 años', value: 0.05 },
+                    { label: 'He sido suspendido 2 veces en los ultimos 5 años', value: 0.1 },
+                    { label: 'He sido suspendido 3 veces en los ultimos 5 años', value: 0.2 },
                 ]
             }
         },
         {
             type: 'select',
-            name: 'medidasSeguridad',
-            label: 'Medidas de Seguridad Implementadas',
+            name: 'frecuenciaReportes',
+            label: '¿Recibes denuncias o reportes con frecuencia en tu cuenta?',
+            placeholder: 'Selecciona una opción',
             required: true,
             layout: {
                 write: {
-                    containerClass: 'col-4'
+                    containerClass: 'col-span-4'
                 }
             },
             data: {
                 options: [
-                    { label: 'Autentificación de 2 pasos', value: 0.85 },
-                    { label: 'Sin autentificación de 2 pasos', value: 1 },
-                    { label: 'Medidas de seguridad básicas', value: 1.2 }
-                ]
-            }
-        },
-        {
-            type: 'select',
-            name: 'frecuenciaUso',
-            label: 'Frecuencia de uso y publicación',
-            required: true,
-            layout: {
-                write: {
-                    containerClass: 'col-4'
-                }
-            },
-            data: {
-                options: [
-                    { label: 'Frecuencia de uso moderada', value: 1 },
-                    { label: 'Frecuencia de uso alta (más de 1 publicación al día)', value: 1.2 }
+                    { label: 'Nunca me han reportado', value: 0 },
+                    { label: 'Algunas veces me han reportado, pero no afecta mi cuenta', value: 0.05 },
+                    { label: 'Recibo reportes con frecuencia, pero no me han suspendido', value: 0.1 },
+                    { label: 'Recibo reportes con frecuencia y ya me han suspendido antes', value: 0.2 }
                 ]
             }
         },
         {
             type: 'select',
             name: 'tipoContenido',
-            label: 'Tipo de contenido publicado',
+            label: '¿Qué tipo de contenido publicas principalmente en tu cuenta?',
+            placeholder: 'Selecciona una opción',
             required: true,
             layout: {
                 write: {
-                    containerClass: 'col-4'
+                    containerClass: 'col-span-4'
                 }
             },
             data: {
                 options: [
-                    { label: 'Seguro (estilo de vida, educativo, productos y servicios, motivacional o inspirador, arte y creatividad, entrenamiento, deportes, libros y películas, eventos familiares, contenido caritativo)', value: 1 },
-                    { label: 'Controversial (política, religión, contenido sexual, teorías conspirativas, salud, violencia)', value: 1.3 }
-                ]
-            }
-        },
-        {
-            type: 'select',
-            name: 'interaccionUsuarios',
-            label: 'Interacción con otros usuarios',
-            required: true,
-            layout: {
-                write: {
-                    containerClass: 'col-4'
-                }
-            },
-            data: {
-                options: [
-                    { label: 'Interacción moderada', value: 1 },
-                    { label: 'Interacción polémica', value: 1.4 }
+                    {
+                        label: 'Personal / Familiar',
+                        // Factores según la cobertura 1, 2, y 3
+                        value: {
+                            name: 'Personal / Familiar',
+                            "1": 0.00,
+                            "2": 0.00,
+                            "3": 0.00
+                        }
+                    },
+                    {
+                        label: 'Educativo / Cultural',
+                        value: {
+                            name: 'Educativo / Cultural',
+                            "1": 0.05,
+                            "2": 0.04,
+                            "3": 0.03
+                        }
+                    },
+                    {
+                        label: 'Entretenimiento / Deportes / Lifestyle',
+                        value: {
+                            name: 'Entretenimiento / Deportes / Lifestyle',
+                            "1": 0.05,
+                            "2": 0.05,
+                            "3": 0.05
+                        }
+                    },
+                    {
+                        label: 'Humor / Memes / Reacciones',
+                        value: {
+                            name: 'Humor / Memes / Reacciones',
+                            "1": 0.07,
+                            "2": 0.08,
+                            "3": 0.08
+                        }
+                    },
+                    {
+                        label: 'Finanzas / Criptomonedas / Negocios',
+                        value: {
+                            name:  'Finanzas / Criptomonedas / Negocios',
+                            "1": 0.10,
+                            "2": 0.10,
+                            "3": 0.12
+                        }
+                    },
+                    {
+                        label: 'Opiniones Polémicas / Conspiraciones',
+                        value: {
+                            name:   'Opiniones Polémicas / Conspiraciones',
+                            "1": 0.12,
+                            "2": 0.13,
+                            "3": 0.15
+                        }
+                    },
+                    {
+                        label: 'Noticias / Activismo / Política',
+                        value: {
+                            name: 'Noticias / Activismo / Política',
+                            "1": 0.15,
+                            "2": 0.15,
+                            "3": 0.18
+                        }
+                    },
+                    {
+                        label: 'Contenido adulto / Apuestas / Violencia',
+                        value: {
+                            name: 'Contenido adulto / Apuestas / Violencia',
+                            "1": 0.20,
+                            "2": 0.20,
+                            "3": 0.20
+                        }
+                    }
                 ]
             }
         }
